@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Hosting;
+using EmailService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using ProductsManageApp.Controllers;
 using ProductsManageApp.Data;
 using ProductsManageApp.Models;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +36,23 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
     opt.SignIn.RequireConfirmedAccount = false;
 }).AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+   opt.TokenLifespan = TimeSpan.FromHours(2));
+
+//var emailConfig = builder.Configuration
+//    .GetSection("EmailConfiguration")
+//    .Get<EmailConfiguration>();
+
+builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
+
+//builder.Services.AddSingleton(emailConfig);
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 
 // Add authentication
 builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
