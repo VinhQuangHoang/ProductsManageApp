@@ -59,11 +59,9 @@ namespace ProductsManageApp.Controllers
                                   {
                                       Value = u.Id,
                                       Text = u.Email
-                                  })
-                                  .ToList();
+                                  }).ToList();
 
-
-                ViewData["UserIds"] = new SelectList(userIds, "Value", "Text"); // Truyền danh sách vào ViewBag
+                ViewData["UserIds"] = new SelectList(userIds, "Value", "Text");
             }
 
             return View();
@@ -91,7 +89,7 @@ namespace ProductsManageApp.Controllers
                             product.Description,
                             product.Price,
                             product.UserId,
-                            CreatedDate = DateTime.UtcNow // Lấy ngày giờ hiện tại, hoặc bạn có thể lấy từ thuộc tính CreatedDate của đối tượng Product nếu đã được gán giá trị
+                            CreatedDate = DateTime.UtcNow // Get realtime value
                         });
                     }
 
@@ -99,8 +97,7 @@ namespace ProductsManageApp.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, "An error occurred while creating the product.");
-                    // Log the exception or handle it as per your application's error handling strategy
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating the product.");                    
                     return View(product);
                 }
             }
@@ -133,8 +130,6 @@ namespace ProductsManageApp.Controllers
         }
 
 
-
-        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -161,11 +156,24 @@ namespace ProductsManageApp.Controllers
             {
                 return NotFound();
             }
+            using (IDbConnection dbConnection = new NpgsqlConnection(_connectionString))
+            {
+                dbConnection.Open();
+                var sqlQuery = @"SELECT ""Id"", ""Email"" FROM ""AspNetUsers""";
+
+                var userIds = dbConnection.Query<User>(sqlQuery)
+                                  .Select(u => new SelectListItem
+                                  {
+                                      Value = u.Id,
+                                      Text = u.Email
+                                  }).ToList();
+
+                ViewData["UserIds"] = new SelectList(userIds, "Value", "Text");
+            }
 
             return View(product);
         }
 
-        // POST: Products/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Product product)
@@ -186,7 +194,8 @@ namespace ProductsManageApp.Controllers
                     SET ""Name"" = @Name, 
                         ""Description"" = @Description, 
                         ""Price"" = @Price, 
-                        ""CreatedDate"" = @CreatedDate 
+                        ""CreatedDate"" = @CreatedDate,
+                        ""UserId"" = @UserId
                     WHERE ""Id"" = @Id;";
 
                     await dbConnection.ExecuteAsync(sqlQuery, product);
@@ -198,7 +207,6 @@ namespace ProductsManageApp.Controllers
             return View(product);
         }
 
-        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -229,7 +237,6 @@ namespace ProductsManageApp.Controllers
             return View(product);
         }
 
-        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

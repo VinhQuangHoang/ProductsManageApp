@@ -13,7 +13,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.ConfigureApplicationCookie(o => o.LoginPath = "/Account/Login");
-// Add DbContext
+// Add AppDbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -31,7 +31,7 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
     opt.Password.RequireUppercase = false;
 
     //opt.Tokens. = "/Account/Login";
-    opt.SignIn.RequireConfirmedEmail = false;
+    opt.SignIn.RequireConfirmedEmail = true;
     opt.SignIn.RequireConfirmedPhoneNumber = false;
     opt.SignIn.RequireConfirmedAccount = false;
 }).AddEntityFrameworkStores<AppDbContext>()
@@ -39,10 +39,6 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
    opt.TokenLifespan = TimeSpan.FromHours(2));
-
-//var emailConfig = builder.Configuration
-//    .GetSection("EmailConfiguration")
-//    .Get<EmailConfiguration>();
 
 builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailConfiguration"));
 
