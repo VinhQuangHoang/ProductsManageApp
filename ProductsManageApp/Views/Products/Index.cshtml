@@ -1,0 +1,166 @@
+﻿@* @model X.PagedList.IPagedList<ProductsManageApp.Models.Product>
+@using X.PagedList.Mvc
+@using X.PagedList.Mvc.Core
+
+
+@{
+    ViewData["Title"] = "Index";
+    var pageList = Model;
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<form asp-action="Index" method="get">
+    <p>
+        <input type="text" name="searchString" value="@ViewBag.CurrentFilter" />
+        <input type="submit" value="Search" class="btn btn-primary" />
+    </p>
+</form>
+
+@if (Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchString = ViewBag.CurrentFilter }))
+    </div>
+}
+else
+{
+    <p>No products found.</p>
+}
+ *@
+
+
+
+@model X.PagedList.IPagedList<ProductsManageApp.Models.Product>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Index";
+    var pageList = Model;
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+@* <form asp-action="Index" method="get">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" name="searchString" class="form-control" value="@ViewBag.CurrentFilter" placeholder="Search by name" />
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </span>
+            </div>
+        </div>
+    </div>
+</form> *@
+
+<form asp-action="Index" method="get">
+    <p>
+        Search: <input type="text" name="searchString" value="@ViewBag.CurrentFilter" />
+        <input type="submit" value="Search" class="btn btn-primary" />
+        @if (!String.IsNullOrEmpty(ViewBag.CurrentFilter))
+        {
+            <a asp-action="ClearSearch" class="btn btn-secondary">Clear Search</a>
+        }
+        <a asp-action="ShowAll" class="btn btn-secondary">Show All</a>
+    </p>
+</form>
+
+@if (pageList.Count > 0)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in pageList)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Details</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchString = ViewBag.CurrentFilter }),
+                new PagedListRenderOptions
+    {
+        DisplayItemSliceAndTotal = false,
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+        MaximumPageNumbersToDisplay = 5,
+        LinkToFirstPageFormat = "<<",
+        LinkToPreviousPageFormat = "<",
+        LinkToIndividualPageFormat = "{0}",
+        LinkToNextPageFormat = ">",
+        LinkToLastPageFormat = ">>",
+        ClassToApplyToFirstListItemInPager = "start",
+        ClassToApplyToLastListItemInPager = "end",
+        UlElementClasses = new[] { "pagination" },
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        ContainerDivClasses = new[] { "text-center" }
+    })
+
+    </div>
+}
+else
+{
+    <p>No products found.</p>
+}
